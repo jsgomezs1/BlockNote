@@ -40,9 +40,31 @@ export const buttonBlock = createReactBlockSpec(
       },
       backgroundColor: {
         default: NotionColors.blue.bg,
+        values: [
+          NotionColors.gray.bg,
+          NotionColors.brown.bg,
+          NotionColors.orange.bg,
+          NotionColors.yellow.bg,
+          NotionColors.green.bg,
+          NotionColors.blue.bg,
+          NotionColors.purple.bg,
+          NotionColors.pink.bg,
+          NotionColors.red.bg,
+        ] as const,
       },
       textColor: {
         default: NotionColors.blue.text,
+        values: [
+          NotionColors.gray.text,
+          NotionColors.brown.text,
+          NotionColors.orange.text,
+          NotionColors.yellow.text,
+          NotionColors.green.text,
+          NotionColors.blue.text,
+          NotionColors.purple.text,
+          NotionColors.pink.text,
+          NotionColors.red.text,
+        ] as const,
       },
       size: {
         default: "medium" as ButtonSize,
@@ -52,6 +74,33 @@ export const buttonBlock = createReactBlockSpec(
     content: "none",
   },
   {
+    parse: (element: HTMLElement) => {
+      // Parse div elements with data-content-type="button"
+      if (element.tagName === "DIV" && element.getAttribute("data-content-type") === "button") {
+        return {
+          text: element.getAttribute("data-text") || "Button",
+          backgroundColor: element.getAttribute("data-bg-color") || NotionColors.blue.bg,
+          textColor: element.getAttribute("data-text-color") || NotionColors.blue.text,
+          size: (element.getAttribute("data-size") as ButtonSize) || "medium",
+        };
+      }
+      return undefined;
+    },
+    toExternalHTML: (props) => {
+      // Convert button block back to HTML with data attributes for the diff tool
+      const { text, backgroundColor, textColor, size } = props.block.props;
+      return (
+        <div
+          data-content-type="button"
+          data-text={text}
+          data-bg-color={backgroundColor}
+          data-text-color={textColor}
+          data-size={size}
+        >
+          {text}
+        </div>
+      );
+    },
     render: (props) => {
       const { block } = props;
       const { text, backgroundColor, textColor, size } = block.props;
