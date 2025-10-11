@@ -169,42 +169,14 @@ export default function App() {
       {
         type: "button",
         props: {
-          text: "Click Me!",
+          text: "Custom Button example!",
           backgroundColor: NotionColors.blue.bg,
           textColor: NotionColors.blue.text,
           size: "medium",
         },
       },
       // Example 2: Green button (large size)
-      {
-        type: "button",
-        props: {
-          text: "Large Green Button",
-          backgroundColor: NotionColors.green.bg,
-          textColor: NotionColors.green.text,
-          size: "large",
-        },
-      },
-      // Example 3: Red button (small size)
-      {
-        type: "button",
-        props: {
-          text: "Small Alert",
-          backgroundColor: NotionColors.red.bg,
-          textColor: NotionColors.red.text,
-          size: "small",
-        },
-      },
-      // Example 4: Purple button (medium size)
-      {
-        type: "button",
-        props: {
-          text: "Action Button",
-          backgroundColor: NotionColors.purple.bg,
-          textColor: NotionColors.purple.text,
-          size: "medium",
-        },
-      },
+     
             {
         type: "paragraph",
         props: {
