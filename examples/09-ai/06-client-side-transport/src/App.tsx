@@ -1,8 +1,8 @@
-import { createGroq } from "@ai-sdk/groq";
-import { BlockNoteEditor, filterSuggestionItems } from "@blocknote/core";
+import { BlockNoteEditor, BlockNoteSchema, defaultBlockSpecs, filterSuggestionItems } from "@blocknote/core";
 import "@blocknote/core/fonts/inter.css";
 import { en } from "@blocknote/core/locales";
 import { BlockNoteView } from "@blocknote/mantine";
+import { createGroq } from "@ai-sdk/groq";
 import "@blocknote/mantine/style.css";
 import {
   FormattingToolbar,
@@ -17,35 +17,88 @@ import {
   AIToolbarButton,
   ClientSideTransport,
   createAIExtension,
-  fetchViaProxy,
   getAISlashMenuItems,
 } from "@blocknote/xl-ai";
 import { en as aiEn } from "@blocknote/xl-ai/locales";
 import "@blocknote/xl-ai/style.css";
-import { getEnv } from "./getEnv";
-
-const BASE_URL =
-  getEnv("BLOCKNOTE_AI_SERVER_BASE_URL") || "https://localhost:3000/ai";
+import { buttonBlock, insertButtonItem, NotionColors } from "./custom-button";
 
 // We define the model directly in our app using the Vercel AI SDK
+// Using direct API calls without proxy server for development
+const groqApiKey = (import.meta as any).env?.VITE_GROQ_API_KEY;
+
+if (!groqApiKey) {
+  console.error("VITE_GROQ_API_KEY environment variable is not set. Please create a .env file with your Groq API key.");
+}
+
 const model = createGroq({
-  // We supply a custom fetch function so that requests are routed through our proxy server
-  // (see `packages/xl-ai-server/src/routes/proxy.ts`)
-  // this is needed to hide the API key of our LLM provider from the client,
-  // and to prevent CORS issues
-  fetch: fetchViaProxy(
-    (url) => `${BASE_URL}/proxy?provider=groq&url=${encodeURIComponent(url)}`,
-  ),
-  apiKey: "fake-api-key", // the API key is not used as it's actually added in the proxy server
+  apiKey: groqApiKey || "", // Get API key from environment variables
 })("llama-3.3-70b-versatile");
+
+// Create custom schema with button block
+const schema = BlockNoteSchema.create({
+  blockSpecs: {
+    ...defaultBlockSpecs,
+    button: buttonBlock(),
+  },
+});
 
 export default function App() {
   // Creates a new editor instance.
   const editor = useCreateBlockNote({
+    schema,
     dictionary: {
       ...en,
       ai: aiEn, // add default translations for the AI extension
     },
+    initialContent: [
+      {
+        type: "heading",
+        content: "Welcome to AI-Powered Notes",
+      },
+ 
+      // Example 1: Blue button (default, medium size)
+      {
+        type: "button",
+        props: {
+          text: "Click Me!",
+          backgroundColor: NotionColors.blue.bg,
+          textColor: NotionColors.blue.text,
+          size: "medium",
+        },
+      },
+      // Example 2: Green button (large size)
+      {
+        type: "button",
+        props: {
+          text: "Large Green Button",
+          backgroundColor: NotionColors.green.bg,
+          textColor: NotionColors.green.text,
+          size: "large",
+        },
+      },
+      // Example 3: Red button (small size)
+      {
+        type: "button",
+        props: {
+          text: "Small Alert",
+          backgroundColor: NotionColors.red.bg,
+          textColor: NotionColors.red.text,
+          size: "small",
+        },
+      },
+      // Example 4: Purple button (medium size)
+      {
+        type: "button",
+        props: {
+          text: "Action Button",
+          backgroundColor: NotionColors.purple.bg,
+          textColor: NotionColors.purple.text,
+          size: "medium",
+        },
+      },
+
+    ],
     // Register the AI extension
     extensions: [
       createAIExtension({
@@ -58,35 +111,20 @@ export default function App() {
       }),
     ],
     // We set some initial content for demo purposes
-    initialContent: [
-      {
-        type: "heading",
-        props: {
-          level: 1,
-        },
-        content: "Open source software",
-      },
-      {
-        type: "paragraph",
-        content:
-          "Open source software refers to computer programs whose source code is made available to the public, allowing anyone to view, modify, and distribute the code. This model stands in contrast to proprietary software, where the source code is kept secret and only the original creators have the right to make changes. Open projects are developed collaboratively, often by communities of developers from around the world, and are typically distributed under licenses that promote sharing and openness.",
-      },
-      {
-        type: "paragraph",
-        content:
-          "One of the primary benefits of open source is the promotion of digital autonomy. By providing access to the source code, these programs empower users to control their own technology, customize software to fit their needs, and avoid vendor lock-in. This level of transparency also allows for greater security, as anyone can inspect the code for vulnerabilities or malicious elements. As a result, users are not solely dependent on a single company for updates, bug fixes, or continued support.",
-      },
-      {
-        type: "paragraph",
-        content:
-          "Additionally, open development fosters innovation and collaboration. Developers can build upon existing projects, share improvements, and learn from each other, accelerating the pace of technological advancement. The open nature of these projects often leads to higher quality software, as bugs are identified and fixed more quickly by a diverse group of contributors. Furthermore, using open source can reduce costs for individuals, businesses, and governments, as it is often available for free and can be tailored to specific requirements without expensive licensing fees.",
-      },
-    ],
+
   });
 
   // Renders the editor instance using a React component.
   return (
-    <div>
+    <div className="relative h-full p-11">
+            <style>{`
+        /* Remove blue outline from ProseMirror selected nodes - CRITICAL RULE */
+        .bn-block-content.ProseMirror-selectednode > *,
+        .ProseMirror-selectednode > .bn-block-content > * {
+          outline: none !important;
+          border-radius: 0 !important;
+        }
+      `}</style>
       <BlockNoteView
         editor={editor}
         // We're disabling some default UI elements
@@ -138,6 +176,7 @@ function SuggestionMenuWithAI(props: {
         filterSuggestionItems(
           [
             ...getDefaultReactSlashMenuItems(props.editor),
+            insertButtonItem(props.editor),
             // add the default AI slash menu items, or define your own
             ...getAISlashMenuItems(props.editor),
           ],
