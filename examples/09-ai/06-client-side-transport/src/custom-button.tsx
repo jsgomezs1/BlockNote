@@ -56,11 +56,26 @@ export const buttonBlock = createReactBlockSpec(
       const { block } = props;
       const { text, backgroundColor, textColor, size } = block.props;
 
-      // Size variants - Notion style
+      // Size variants - Notion style (converted to inline styles)
       const sizeStyles = {
-        small: "h-7 px-3 text-sm",
-        medium: "h-8 px-4 text-base",
-        large: "h-10 px-5 text-lg",
+        small: {
+          height: "28px",
+          paddingLeft: "12px",
+          paddingRight: "12px",
+          fontSize: "14px",
+        },
+        medium: {
+          height: "32px",
+          paddingLeft: "16px",
+          paddingRight: "16px",
+          fontSize: "16px",
+        },
+        large: {
+          height: "40px",
+          paddingLeft: "20px",
+          paddingRight: "20px",
+          fontSize: "18px",
+        },
       };
 
       const handleClick = () => {
@@ -76,24 +91,31 @@ export const buttonBlock = createReactBlockSpec(
       };
 
       return (
-        <div className="flex items-center py-1">
+        <div style={{ display: "flex", alignItems: "center", paddingTop: "4px", paddingBottom: "4px" }}>
           <button
             onClick={handleClick}
-            className={`
-              ${sizeStyles[size as ButtonSize]}
-              font-medium
-              rounded-md
-              transition-all
-              duration-200
-              hover:opacity-80
-              active:scale-95
-              cursor-pointer
-              border-0
-              outline-none
-            `}
             style={{
+              ...sizeStyles[size as ButtonSize],
               backgroundColor,
               color: textColor,
+              fontWeight: "500",
+              borderRadius: "6px",
+              transition: "all 0.2s",
+              cursor: "pointer",
+              border: "none",
+              outline: "none",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.8";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "1";
+            }}
+            onMouseDown={(e) => {
+              e.currentTarget.style.transform = "scale(0.95)";
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
             }}
           >
             {text}
