@@ -214,7 +214,7 @@ export default function App() {
 
   });
 
-  // Renders the editor instance using a React component.
+  // Renders the editor instance using a React component. s
   return (
     <div className="relative h-full p-11">
             <style>{`
